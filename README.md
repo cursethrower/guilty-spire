@@ -1,0 +1,56 @@
+# Overview
+Guilty Spire is a discord bot that plays music on your hard drive, written in Python 3.6.x using Rapptz's discord.py API wrapper.
+
+# Key features
+- Single-command local music playing
+- Integrated queue for dynamic playback
+- Path aliasing for safer, easier queueing
+
+# Requirements
+- Python 3.6.x
+- discord.py[voice] v1.3.0a
+- ffmpeg & ffprobe
+- opus
+
+# Installation
+1. Create a discord development app and bot account
+    - https://github.com/SinisterRectus/Discordia/wiki/Setting-up-a-Discord-application
+2. Install discord.py
+    - `pip install -U git+https://github.com/Rapptz/discord.py@master#egg=discord.py[voice]`
+3. Download ffmpeg, ffprobe, and opus (place ff executables and opus folder in environment path)
+    - ffmpeg & ffprobe: https://ffmpeg.org/download.html
+    - opus: http://opus-codec.org/downloads/
+    
+# Example usage
+**Basic queueing**
+```
+# join voice channel
+-harken
+-cast path\to\file.mp3
+-cast path\to\files
+```
+> The bot will immediately start playing music and queue everything else.
+
+**Setting a default voice channel**
+```
+# join voice channel
+-remember
+-cast path\to\files
+```
+> As long as you're in the newly set default voice channel, you will no longer need to use `-harken` to summon the bot.
+
+**Creating a path alias**
+```
+-inscribe "best album ever" "path\to\files"
+-cast best album ever
+```
+> The bot will recognize the alias and retrieve the path.
+
+# Features in development
+- Pause, resume and stop commands
+- Playlist functionality
+
+# Links
+- [discord.py](https://github.com/Rapptz/discord.py)
+- [Theme inspiration](https://gilescorey.bandcamp.com/track/winters-house)
+- [My twitter](https://twitter.com/cursethrower)
