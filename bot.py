@@ -12,7 +12,8 @@ with open('./config/memory.json') as f:
     memory = json.load(f)
 
 bot = commands.Bot(command_prefix='-')
-cogs = ['cogs.sanctum',
+cogs = ['cogs.spire',
+        'cogs.memory',
         'cogs.owner',
         'cogs.event_handler'
         ]

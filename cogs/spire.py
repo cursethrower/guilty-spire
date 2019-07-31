@@ -1,11 +1,12 @@
 import discord
+import json
 import os
 
 from discord.ext import commands, tasks
 from bot import memory
 
 
-class Sanctum(commands.Cog, name='Sanctum', command_attrs=dict(hidden=False)):
+class Spire(commands.Cog, name='Spire', command_attrs=dict(hidden=False)):
     def __init__(self, bot, memory):
         self.bot = bot
         self.memory = memory
@@ -16,7 +17,8 @@ class Sanctum(commands.Cog, name='Sanctum', command_attrs=dict(hidden=False)):
         if not self.voice_client.is_playing():
             try:
                 track = self.queue.pop(0)
-                self.voice_client.play(discord.FFmpegPCMAudio(track))
+                source = await discord.FFmpegOpusAudio.from_probe(track, method='native', **dict(before_options='-stats', options='-maxrate 256k -bufsize 384k'))
+                self.voice_client.play(source)
                 activity = track[track.rfind('\\'):-4][track.index(' ')-1:]
                 await self.bot.change_presence(activity=discord.Activity(name=activity, type=2))
             except IndexError:
@@ -28,8 +30,7 @@ class Sanctum(commands.Cog, name='Sanctum', command_attrs=dict(hidden=False)):
         if channel:
             await channel.connect()
         elif not ctx.author.voice:
-            await ctx.send('You are not in a voice channel.')
-            return
+            return await ctx.send('You are not in a voice channel.')
         client = ctx.guild.voice_client
         if not client:
             client = await ctx.author.voice.channel.connect()
@@ -45,39 +46,29 @@ class Sanctum(commands.Cog, name='Sanctum', command_attrs=dict(hidden=False)):
         self.queue = []
         await self.bot.change_presence(activity=None)
 
-    @commands.command(name='remember', brief='Sets a default voice channel to join.')
+    @commands.command(name='cast', brief='Plays music with integrated queue.')
     @commands.is_owner()
-    async def remember(self, ctx):
-        if not ctx.author.voice:
-            await ctx.send('You are not in a voice channel.')
-            return
-        self.memory["remember"] = str(ctx.author.voice.channel.id)
-        await ctx.send('I remember.')
-
-    @commands.command(name='forget', brief='Removes the default voice channel to join.')
-    @commands.is_owner()
-    async def forget(self, ctx):
-        self.memory["remember"] = 0
-        await ctx.send('I have forgotten.')
-
-    @commands.command(name='sing', brief='Plays music with integrated queue.')
-    @commands.is_owner()
-    async def sing(self, ctx, *, path):
+    async def cast(self, ctx, *, path: str):
         if not ctx.guild.voice_client and self.memory["remember"] != "none":
             channel = await commands.VoiceChannelConverter().convert(ctx, self.memory["remember"])
             await ctx.invoke(self.bot.get_command("harken"), channel)
-        if not path.endswith('.mp3'):
-            if not path.endswith('/'): path = f'{path}+/'
-            files = os.listdir(path)
-            for file in files:
-                self.queue.append(path+file)
-        elif path.endswith('.mp3'):
-            self.queue.append(path)
+        spell = self.memory["spellbook"].get(path.lower(), None)
+        if not spell:
+            if not path.endswith('.mp3'):
+                if not path.endswith('\\'): path = path+'\\'
+                files = os.listdir(path)
+                for file in files:
+                    self.queue.append(path+file)
+            elif path.endswith('.mp3'):
+                self.queue.append(path)
+            else:
+                return
         else:
-            return
-        
-        self.queue_task.start()
+            self.queue.append(spell)
+
+        if not self.queue_task.current_loop:
+            self.queue_task.start()
 
 
 def setup(bot):
-    bot.add_cog(Sanctum(bot, memory))
+    bot.add_cog(Spire(bot, memory))
