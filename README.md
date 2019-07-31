@@ -1,10 +1,21 @@
 # Overview
-Guilty Spire is a discord bot that plays music on your hard drive, written in Python 3.6.x using Rapptz's discord.py API wrapper.
+Guilty Spire is a discord bot that plays music on your hard drive, written in Python 3.6.x using Rapptz's [discord.py](https://github.com/Rapptz/discord.py) API wrapper.
 
-# Key features
-- Single-command local music playing
+<p align="center">
+  <img width="420" height="340" src="guilty_spire.png?raw=true">
+</p>
+
+<p align=center><i>God's in his church with his <a href="https://gilescorey.bandcamp.com/track/winters-house">guilty spires</a>.</i></p>
+
+# Current features
+- Single-command local music streaming
 - Integrated queue for dynamic playback
 - Path aliasing for safer, easier queueing
+
+# Features in development
+- Pause, resume and stop commands
+- Queue editing
+- Playlist support
 
 # Requirements
 - Python 3.6.x
@@ -15,12 +26,17 @@ Guilty Spire is a discord bot that plays music on your hard drive, written in Py
 # Installation
 1. Create a discord development app and bot account
     - https://github.com/SinisterRectus/Discordia/wiki/Setting-up-a-Discord-application
-2. Install discord.py
+2. Install discord.py[voice]
     - `pip install -U git+https://github.com/Rapptz/discord.py@master#egg=discord.py[voice]`
 3. Download ffmpeg, ffprobe, and opus (place ff executables and opus folder in environment path)
     - ffmpeg & ffprobe: https://ffmpeg.org/download.html
     - opus: http://opus-codec.org/downloads/
-    
+4. Create `./config/config.json`:
+```
+{
+    "token": "token-goes-here"
+}
+```
 # Example usage
 **Basic queueing**
 ```
@@ -46,11 +62,6 @@ Guilty Spire is a discord bot that plays music on your hard drive, written in Py
 ```
 > The bot will recognize the alias and retrieve the path.
 
-# Features in development
-- Pause, resume and stop commands
-- Playlist functionality
-
-# Links
-- [discord.py](https://github.com/Rapptz/discord.py)
-- [Theme inspiration](https://gilescorey.bandcamp.com/track/winters-house)
-- [My twitter](https://twitter.com/cursethrower)
+# Contact
+- cursethrower#3089
+- [twitter](https://twitter.com/cursethrower)
