@@ -10,6 +10,8 @@ token = config["token"]
 
 with open('./config/memory.json') as f:
     memory = json.load(f)
+    if not memory.get("spellbook", None):
+        memory["spellbook"] = dict()
 
 bot = commands.Bot(command_prefix='-')
 cogs = ['cogs.spire',

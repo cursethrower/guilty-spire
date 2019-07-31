@@ -17,7 +17,7 @@ class Spire(commands.Cog, name='Spire', command_attrs=dict(hidden=False)):
         if not self.voice_client.is_playing():
             try:
                 track = self.queue.pop(0)
-                source = await discord.FFmpegOpusAudio.from_probe(track, method='native', **dict(before_options='-stats', options='-maxrate 256k -bufsize 384k'))
+                source = await discord.FFmpegOpusAudio.from_probe(track, method='native', **dict(before_options='-stats'))
                 self.voice_client.play(source)
                 activity = track[track.rfind('\\'):-4][track.index(' ')-1:]
                 await self.bot.change_presence(activity=discord.Activity(name=activity, type=2))
@@ -53,18 +53,17 @@ class Spire(commands.Cog, name='Spire', command_attrs=dict(hidden=False)):
             channel = await commands.VoiceChannelConverter().convert(ctx, self.memory["remember"])
             await ctx.invoke(self.bot.get_command("harken"), channel)
         spell = self.memory["spellbook"].get(path.lower(), None)
-        if not spell:
-            if not path.endswith('.mp3'):
-                if not path.endswith('\\'): path = path+'\\'
-                files = os.listdir(path)
-                for file in files:
-                    self.queue.append(path+file)
-            elif path.endswith('.mp3'):
-                self.queue.append(path)
-            else:
-                return
+        if spell is not None: 
+            path = spell
+        if not path.endswith('.mp3'):
+            if not path.endswith('\\'): path += '\\'
+            files = os.listdir(path)
+            for file in files:
+                self.queue.append(path+file)
+        elif path.endswith('.mp3'):
+            self.queue.append(path)
         else:
-            self.queue.append(spell)
+            return
 
         if not self.queue_task.current_loop:
             self.queue_task.start()

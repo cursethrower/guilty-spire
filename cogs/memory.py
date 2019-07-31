@@ -29,15 +29,17 @@ class Memory(commands.Cog, name='Memory', command_attrs=dict(hidden=False)):
             json.dump(self.memory, f, indent=4)
         await ctx.send('I have forgotten.')
 
-    @commands.command(name='inscribe', brief='Aliases a path for safer queueing.')
+    @commands.command(name='scribe', brief='Aliases a path for safer queueing.')
     @commands.is_owner()
     async def scribe(self, ctx, *args):
         if len(args) != 2:
             return await ctx.send('Bad paramters.')
-        if args[1].lower() in self.memory["spellbook"].keys():
+        alias, path = args
+        if not path.endswith('.mp3'): path += '\\'
+        if self.memory["spellbook"].get(alias.lower(), None) is not None:
             return await ctx.send('That is already a spell. See `-rescribe`.')
         
-        self.memory["spellbook"][args[0].lower()] = args[1]
+        self.memory["spellbook"][alias.lower()] = path
         with open('./config/memory.json', 'w') as f:
             json.dump(self.memory, f, indent=4)
         await ctx.send('Spell inscribed.')
@@ -45,9 +47,13 @@ class Memory(commands.Cog, name='Memory', command_attrs=dict(hidden=False)):
     @commands.command(name='rescribe', brief='Edits an existing path alias.')
     @commands.is_owner()
     async def rescribe(self, ctx, *args):
-        if len(args) != 2 or args[0] not in self.memory["spellbook"].keys():
+        if len(args) != 2:
             return await ctx.send('Bad paramters.')
-        self.memory["spellbook"][args[0].lower()] = args[1]
+        alias, path = args
+        if self.memory["spellbook"].get(alias.lower(), 'None') is None:
+            return await ctx.send('That is not a spell.')
+            
+        self.memory["spellbook"][alias.lower()] = path
         with open('./config/memory.json', 'w') as f:
             json.dump(self.memory, f, indent=4)
         await ctx.send('Spell rescribed.')
