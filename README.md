@@ -32,14 +32,14 @@ Guilty Spire is a discord bot that plays music on your hard drive, written in Py
     - ffmpeg & ffprobe: https://ffmpeg.org/download.html
     - opus: http://opus-codec.org/downloads/
 4. Create `./config/config.json`:
-```
+```json
 {
     "token": "token-goes-here"
 }
 ```
 # Example usage
 **Basic queueing**
-```
+```sh
 # join voice channel
 -harken
 -cast path\to\file.mp3
@@ -48,7 +48,7 @@ Guilty Spire is a discord bot that plays music on your hard drive, written in Py
 *The bot will immediately start playing music and queue everything else*
 
 **Setting a default voice channel**
-```
+```sh
 # join voice channel
 -remember
 -cast path\to\files
@@ -56,7 +56,7 @@ Guilty Spire is a discord bot that plays music on your hard drive, written in Py
 *As long as you're in the newly set default voice channel, you will no longer need to use `-harken` to summon the bot.*
 
 **Creating a path alias**
-```
+```sh
 -inscribe "best album ever" "path\to\files"
 -cast best album ever
 ```
