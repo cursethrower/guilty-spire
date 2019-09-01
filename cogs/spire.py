@@ -2,6 +2,7 @@ import discord
 import json
 import os
 
+from collections import deque
 from discord.ext import commands, tasks
 from bot import memory
 
@@ -10,13 +11,16 @@ class Spire(commands.Cog, name='Spire', command_attrs=dict(hidden=False)):
     def __init__(self, bot, memory):
         self.bot = bot
         self.memory = memory
-        self.queue = []
+        self.queue = list()
+
+    def update_queue(self):
+        self.queue.pop(0)
 
     @tasks.loop(seconds=2.0, count=None)
     async def queue_task(self):
         if not self.voice_client.is_playing():
             try:
-                track = self.queue.pop(0)
+                track = self.queue[0]
                 source = await discord.FFmpegOpusAudio.from_probe(track, method='native', **dict(before_options='-stats'))
                 self.voice_client.play(source)
                 activity = track[track.rfind('\\'):-4][track.index(' ')-1:]

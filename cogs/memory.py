@@ -35,7 +35,7 @@ class Memory(commands.Cog, name='Memory', command_attrs=dict(hidden=False)):
         if len(args) != 2:
             return await ctx.send('Bad paramters.')
         alias, path = args
-        if not path.endswith('.mp3'): path += '\\'
+        if not path.endswith('.mp3') and not path.endswith('\\'): path += '\\'
         if self.memory["spellbook"].get(alias.lower(), None) is not None:
             return await ctx.send('That is already a spell. See `-rescribe`.')
         
@@ -52,7 +52,7 @@ class Memory(commands.Cog, name='Memory', command_attrs=dict(hidden=False)):
         alias, path = args
         if self.memory["spellbook"].get(alias.lower(), 'None') is None:
             return await ctx.send('That is not a spell.')
-            
+
         self.memory["spellbook"][alias.lower()] = path
         with open('./config/memory.json', 'w') as f:
             json.dump(self.memory, f, indent=4)
