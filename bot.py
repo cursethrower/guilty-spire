@@ -1,5 +1,6 @@
 import discord
 import json
+import os
 
 from discord.ext import commands
 
@@ -7,6 +8,13 @@ from discord.ext import commands
 with open('./config/config.json') as f:
     config = json.load(f)
 token = config["token"]
+
+if not os.path.exists('./config/memory.json'):
+    print('doesn\'t exist')
+    memory = dict()
+    memory["spellbook"] = dict()
+    with open('./config/memory.json', 'w') as f:
+        json.dump(memory, f, indent=4)
 
 with open('./config/memory.json') as f:
     memory = json.load(f)
