@@ -19,7 +19,7 @@ class Memory(commands.Cog, name='Memory', command_attrs=dict(hidden=False)):
         self.memory["remember"] = str(ctx.author.voice.channel.id)
         with open('./config/memory.json', 'w') as f:
             json.dump(self.memory, f, indent=4)
-        await ctx.send('I will remember.')
+        return await ctx.send('I will remember.')
 
     @commands.command(name='forget', brief='Removes the default voice channel to join.')
     @commands.is_owner()
@@ -27,13 +27,13 @@ class Memory(commands.Cog, name='Memory', command_attrs=dict(hidden=False)):
         self.memory["remember"] = 0
         with open('./config/memory.json', 'w') as f:
             json.dump(self.memory, f, indent=4)
-        await ctx.send('I have forgotten.')
+        return await ctx.send('I have forgotten.')
 
-    @commands.command(name='scribe', brief='Aliases a path for safer queueing.')
+    @commands.command(name='inscribe', brief='Aliases a path.')
     @commands.is_owner()
     async def scribe(self, ctx, *args):
         if len(args) != 2:
-            return await ctx.send('Bad paramters.')
+            return await ctx.send('Bad parameters.')
         alias, path = args
         if not path.endswith('.mp3') and not path.endswith('\\'): path += '\\'
         if self.memory["spellbook"].get(alias.lower(), None) is not None:
@@ -44,11 +44,11 @@ class Memory(commands.Cog, name='Memory', command_attrs=dict(hidden=False)):
             json.dump(self.memory, f, indent=4)
         await ctx.send('Spell inscribed.')
 
-    @commands.command(name='rescribe', brief='Edits an existing path alias.')
+    @commands.command(name='rescribe', brief='Edits an existing alias.')
     @commands.is_owner()
     async def rescribe(self, ctx, *args):
         if len(args) != 2:
-            return await ctx.send('Bad paramters.')
+            return await ctx.send('Bad parameters.')
         alias, path = args
         if self.memory["spellbook"].get(alias.lower(), 'None') is None:
             return await ctx.send('That is not a spell.')
@@ -58,7 +58,7 @@ class Memory(commands.Cog, name='Memory', command_attrs=dict(hidden=False)):
             json.dump(self.memory, f, indent=4)
         await ctx.send('Spell rescribed.')
 
-    @commands.command(name='annul', brief='Removes an existing path alias.')
+    @commands.command(name='annul', brief='Removes an existing alias.')
     @commands.is_owner()
     async def annul(self, ctx, *, alias):
         spell = self.memory["spellbook"].pop(alias.lower(), None)
