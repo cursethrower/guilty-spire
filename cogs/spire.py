@@ -1,32 +1,48 @@
+import asyncio
 import discord
 import json
+import mutagen
 import os
 
-from collections import deque
 from discord.ext import commands, tasks
 from bot import memory
+from mutagen.easyid3 import EasyID3
 
 
 class Spire(commands.Cog, name='Spire', command_attrs=dict(hidden=False)):
     def __init__(self, bot, memory):
         self.bot = bot
         self.memory = memory
-        self.queue = list()
+        self.queue = []
 
-    def update_queue(self):
-        self.queue.pop(0)
+    async def player(self, op: str='play'):
+        if op == 'play':
+            if not self.voice_client.is_playing():
+                try:
+                    source = await discord.FFmpegOpusAudio.from_probe(self.queue[0], method='native', **dict(before_options='-stats'))
+                    self.voice_client.play(source, after=self.next)
+                except IndexError:
+                    return
+        elif op == 'pause':
+            if self.voice_client.is_paused(): return
+            return self.voice_client.pause()
+        elif op == 'resume':
+            if not self.voice_client.is_paused(): return
+            return self.voice_client.resume()
+        elif op == 'skip':
+            if not self.voice_client.is_playing(): return
+            self.voice_client.stop()
 
-    @tasks.loop(seconds=2.0, count=None)
-    async def queue_task(self):
-        if not self.voice_client.is_playing():
-            try:
-                track = self.queue[0]
-                source = await discord.FFmpegOpusAudio.from_probe(track, method='native', **dict(before_options='-stats'))
-                self.voice_client.play(source)
-                activity = track[track.rfind('\\'):-4][track.index(' ')-1:]
-                await self.bot.change_presence(activity=discord.Activity(name=activity, type=2))
-            except IndexError:
-                self.queue_task.cancel()
+    def next(self, error=discord.ClientException):
+        try:
+            self.queue.pop(0)
+        except IndexError:
+            return
+        future = asyncio.run_coroutine_threadsafe(self.player(op='play'), self.bot.loop)
+        try:
+            future.result()
+        except:
+            pass
 
     @commands.command(name='harken', brief='Adds the bot to a voice channel.')
     @commands.is_owner()
@@ -47,8 +63,8 @@ class Spire(commands.Cog, name='Spire', command_attrs=dict(hidden=False)):
         if not client:
             return
         await client.disconnect()
+        del self.queue[:]
         self.queue = []
-        await self.bot.change_presence(activity=None)
 
     @commands.command(name='cast', brief='Plays music with integrated queue.')
     @commands.is_owner()
@@ -61,16 +77,61 @@ class Spire(commands.Cog, name='Spire', command_attrs=dict(hidden=False)):
             path = spell
         if not path.endswith('.mp3'):
             if not path.endswith('\\'): path += '\\'
-            files = os.listdir(path)
-            for file in files:
-                self.queue.append(path+file)
+            for f in os.listdir(path):
+                if not f.endswith('.mp3'): continue
+                self.queue.append(path+f)
         elif path.endswith('.mp3'):
-            self.queue.append(path)
+            return self.queue.append(path)
         else:
             return
 
-        if not self.queue_task.current_loop:
-            self.queue_task.start()
+        if not self.voice_client.is_playing():
+            await self.player(op="play")
+
+    @commands.command(name='show', brief='Shows the queue.')
+    @commands.is_owner()
+    async def show(self, ctx):
+        print(EasyID3.valid_keys.keys())
+        if not self.queue: return await ctx.send('Queue is empty.')
+
+        string = ''
+        for pos, item in enumerate(self.queue):
+            try:
+                song = EasyID3(item)
+            except mutagen.id3.ID3NoHeaderError:
+                song = mutagen.File(item, easy=True)
+            except mutagen.MutagenError:
+                continue
+            if pos != 0:
+                string += f'{str(pos).zfill(2)}: {song["albumartist"][0]} - {song["title"][0]}\n'
+            else:
+                string += f'np: {song["albumartist"][0]} - {song["title"][0]}\n'
+        return await ctx.send(f'Queue:\n```{string}```')
+
+    @commands.command(name='pause', brief='Pauses the current song.')
+    @commands.is_owner()
+    async def pause(self, ctx):
+        await self.player(op='pause')
+
+    @commands.command(name='resume', brief='Resumes the current paused song.')
+    @commands.is_owner()
+    async def resume(self, ctx):
+        await self.player(op='resume')
+
+    @commands.command(name='skip', brief='Skips the current song.')
+    @commands.is_owner()
+    async def skip(self, ctx):
+        await self.player(op='skip')
+
+    @commands.command(name='remove', brief='Removes a song from the queue.')
+    @commands.is_owner()
+    async def remove(self, ctx, index: int):
+        if index < 1:
+            return await ctx.send('You cannot remove the current song.')
+        if index > len(self.queue)-1:
+            return await ctx.send('Invalid queue position.')
+        self.queue.pop(index)
+        return await ctx.send(f'Removed song in position {index}.')
 
 
 def setup(bot):
