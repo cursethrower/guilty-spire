@@ -8,26 +8,26 @@ Guilty Spire is a discord bot that plays music on your hard drive, written in Py
 <p align=center><i>God's in his church with his <a href="https://gilescorey.bandcamp.com/track/winters-house">guilty spires</a>.</i></p>
 
 # Current features
-- Single-command local music streaming
-- Integrated queue for dynamic playback
+- Single-command music streaming
+- Integrated queue with control commands
 - Path aliasing for safer, easier queueing
 
 # Features in development
-- Pause, resume and stop commands
-- Queue editing
 - Playlist support
 
 # Requirements
 - Python 3.7.x
 - discord.py[voice] v1.3.0a
+- mutagen
 - ffmpeg & ffprobe
 - opus
 
 # Installation
 1. Create a discord development app and bot account
     - https://github.com/SinisterRectus/Discordia/wiki/Setting-up-a-Discord-application
-2. Install discord.py[voice]
+2. Install required modules
     - `pip install -U git+https://github.com/Rapptz/discord.py@master#egg=discord.py[voice]`
+    - `pip install mutagen`
 3. Download ffmpeg, ffprobe, and opus (place ff executables and opus folder in environment path)
     - ffmpeg & ffprobe: https://ffmpeg.org/download.html
     - opus: http://opus-codec.org/downloads/
